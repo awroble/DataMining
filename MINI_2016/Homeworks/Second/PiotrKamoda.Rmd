@@ -1,0 +1,171 @@
+---
+title: "hw2"
+author: "Piotr Kamoda"
+date: "22 pazdziernika 2016"
+output: html_document
+---
+
+```{r setup, echo=FALSE}
+library(caret)
+d1=read.table("student-mat.csv",sep=";",header=TRUE)
+```
+
+We have been given following data:
+
+```{r data}
+head(d1)
+````
+
+The task is to choose variables for knn and find optimal k. Lets start with dividing data:
+
+```{r divide}
+set.seed(1313)
+indxTrain <- createDataPartition(y = d1$Dalc, p = 0.75)
+str(indxTrain)
+
+d1Train <- d1[indxTrain$Resample1,]
+d1Test <- d1[-indxTrain$Resample1,]
+d1Train$Dalc <- factor(d1Train$Dalc) #Make sure setup is ok
+d1Test$Dalc <- factor(d1Test$Dalc) #Make sure setup is ok
+```
+
+I've chosen Dalc as Factor variable and failures and absences as reference data. Now lets find optimal k for that:
+
+```{r tune}
+tuneK <- 1:100
+performance <- sapply(tuneK, function(k) {
+  knnFit <- knn3(Dalc ~ failures+absences, data = d1Train, k=k)
+  tab <- table(true = d1Test$Dalc,
+               predict = predict(knnFit, d1Test, type="class"))
+  sum(diag(tab)) / sum(tab)
+})
+```
+
+And plot some results:
+
+```{r results, echo=FALSE}
+df <- data.frame(tuneK, performance)
+
+ggplot(df, aes(tuneK, performance)) +
+  geom_point() + 
+  geom_smooth(se=FALSE, span=0.1, size=2) +
+  theme_bw()
+```
+
+We can see that approximately 15 has highest optimum, let's check that:
+
+```{r check1}
+knnFit <- knn3(Dalc ~ failures+absences, data = d1Train, k=15)
+tab <- table(true = d1Test$Dalc,
+             predict = predict(knnFit, d1Test, type="class"))
+sum(diag(tab)) / sum(tab)
+```
+
+That had quality around 0.683, but we shood check 14 and 16 just to be sure
+
+```{r check23}
+knnFit <- knn3(Dalc ~ failures+absences, data = d1Train, k=14)
+tab <- table(true = d1Test$Dalc,
+             predict = predict(knnFit, d1Test, type="class"))
+sum(diag(tab)) / sum(tab)
+
+knnFit <- knn3(Dalc ~ failures+absences, data = d1Train, k=16)
+tab <- table(true = d1Test$Dalc,
+             predict = predict(knnFit, d1Test, type="class"))
+sum(diag(tab)) / sum(tab)
+```
+
+Both are the same, so we can try to lower k to get results quicker. I was able to lower it to 9 without loosing any quality of the classificator:
+
+```{r final}
+
+knnFit <- knn3(Dalc ~ failures+absences, data = d1Train, k=9)
+tab <- table(true = d1Test$Dalc,
+             predict = predict(knnFit, d1Test, type="class"))
+sum(diag(tab)) / sum(tab)
+```
+
+So value of k equal to 9  for model Dalc ~ failures + absences seems to be optimal.
+
+We can also choose more variables and find optimum for that:
+
+```{r more}
+d1Train$Walc <- factor(d1Train$Walc) #Make sure setup is ok
+d1Test$Walc <- factor(d1Test$Walc) #Make sure setup is ok
+tuneK <- 1:100
+performance <- sapply(tuneK, function(k) {
+  knnFit <- knn3(Walc ~ failures+absences+freetime, data = d1Train, k=k)
+  tab <- table(true = d1Test$Dalc,
+               predict = predict(knnFit, d1Test, type="class"))
+  sum(diag(tab)) / sum(tab)
+})
+```
+
+```{r resultsmore, echo=FALSE}
+df <- data.frame(tuneK, performance)
+
+ggplot(df, aes(tuneK, performance)) +
+  geom_point() + 
+  geom_smooth(se=FALSE, span=0.1, size=2) +
+  theme_bw()
+```
+
+Now that looks more random. Quality with K above 50 is constant, but there is one peak around 14, lets find it: <br />
+k = 14 -
+
+```{r more14, echo=FALSE}
+knnFit <- knn3(Walc ~ failures+absences+freetime, data = d1Train, k=14)
+tab <- table(true = d1Test$Walc,
+             predict = predict(knnFit, d1Test, type="class"))
+sum(diag(tab)) / sum(tab)
+```
+
+Yes, that's the value. But it is too soon too assume that most optimal k is larger when there's more variables. Lets do another check for 4 and 5 variables:
+
+```{r more2, echo=FALSE}
+d1Train$Walc <- factor(d1Train$Walc) #Make sure setup is ok
+d1Test$Walc <- factor(d1Test$Walc) #Make sure setup is ok
+tuneK <- 1:100
+performance <- sapply(tuneK, function(k) {
+  knnFit <- knn3(Walc ~ failures+absences+freetime+goout, data = d1Train, k=k)
+  tab <- table(true = d1Test$Dalc,
+               predict = predict(knnFit, d1Test, type="class"))
+  sum(diag(tab)) / sum(tab)
+})
+```
+
+```{r resultsmore2, echo=FALSE}
+df <- data.frame(tuneK, performance)
+
+ggplot(df, aes(tuneK, performance)) +
+  geom_point() + 
+  geom_smooth(se=FALSE, span=0.1, size=2) +
+  theme_bw()
+```
+
+```{r more3, echo=FALSE}
+d1Train$Walc <- factor(d1Train$Walc) #Make sure setup is ok
+d1Test$Walc <- factor(d1Test$Walc) #Make sure setup is ok
+tuneK <- 1:100
+performance <- sapply(tuneK, function(k) {
+  knnFit <- knn3(Walc ~ failures+absences+freetime+goout+health, data = d1Train, k=k)
+  tab <- table(true = d1Test$Dalc,
+               predict = predict(knnFit, d1Test, type="class"))
+  sum(diag(tab)) / sum(tab)
+})
+```
+
+```{r resultsmore3, echo=FALSE}
+df <- data.frame(tuneK, performance)
+
+ggplot(df, aes(tuneK, performance)) +
+  geom_point() + 
+  geom_smooth(se=FALSE, span=0.1, size=2) +
+  theme_bw()
+```
+
+For four variables optimal k is greater then 25 and for five variables it's close to 100. That could mean that the more variables the highger optimal k.
+
+### Conclusion:
+For first variables I've chosen the optimal k was 9. <br />
+I was also able to test that the more variables I choose the bigger the optimal k. And it grows quickly.
