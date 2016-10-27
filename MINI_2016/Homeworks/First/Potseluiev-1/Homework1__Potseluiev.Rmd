@@ -1,0 +1,111 @@
+---
+title: "Homework1 (PP)"
+author: "Pavlo Potseluiev"
+date: "October 27, 2016"
+output: html_document
+---
+
+# Given Task
+1. Load the `PogromcyDanych` package
+2. Use the `setLang()` function to translate columns names into English.
+3. For the dataset `skiJumps2013` present numerical and graphical summaries for following variables: jumpSpeed, jumpDistance, compCountry, jumperCountry, jumperDateOfBirth. 
+4. Create a report in `knitr` with these summaries. Use only competitions in 2014 year.
+
+#Solution
+##1
+First of all, we will install & load packages `PogromcyDanych` and `knitr` which are required for this task. Required `dplyr` package will be loaded automatically.
+```{r, echo=FALSE}
+install.packages('PogromcyDanych',repos="http://cran.rstudio.com/")
+install.packages('knitr',repos="http://cran.rstudio.com/")
+library(PogromcyDanych)
+library(knitr)
+```
+##2
+We need to translate columns names from Polish into English. We will use the setLang() function.
+```{r, echo=FALSE}
+setLang()
+```
+##3
+Third task is about presentation of summary: numerical and graphical types. We should use them for different variables.
+```{r, echo=FALSE}
+data(skiJumps2013)
+```
+Let's check if the data was loaded correctly. We will cut an output for only 5 rows:
+```{r, echo=FALSE}
+head(skiJumps2013[,1:5],5)
+```
+Now we will assign different variables for different rows (jump_speed, jump_distance, comp_country, jumper_Country, jumper_DOB)
+```{r, echo=FALSE}
+jump_speed <-(skiJumps2013$jumpSpeed)
+jump_distance <-(skiJumps2013$jumpDistance)
+comp_country <-(skiJumps2013$compCountry)
+jumper_Country <-(skiJumps2013$jumperCountry)
+jumper_DOB <-(skiJumps2013$jumperDateOfBirth)
+```
+By the way, as it was told in the task 4, we will need only data from the 2014. So we have to different solutions: we can use subset(valuesNames, as.Date(compDate) > "2013-12-31") each time we are using the data,
+Or we can cut off the 2013 data with the same subset function applied to the whole data set:
+```{r, echo=FALSE}
+sj14 <- subset(skiJumps2013, as.Date(skiJumps2013$compDate) > "2013-12-31")
+```
+Again, let's check if the data was filtered out correctly:
+```{r, echo=FALSE}
+head(sj14[,1:5],5)
+```
+
+Now we will rewrite variables with the new data:
+```{r, echo=FALSE}
+jump_speed <-(sj14$jumpSpeed)
+jump_distance <-(sj14$jumpDistance)
+comp_country <-(sj14$compCountry)
+jumper_country <-(sj14$jumperCountry)
+jumper_DOB <-(sj14$jumperDateOfBirth)
+```
+###Numerical summaries
+Now let's provide the numerical summeries for the given values. Note that we have to use different functions (table, summary) for different type of variables. We will cut only first 10 lines of each representation
+Jump Speed
+```{r, echo=FALSE}
+summary(jump_speed)
+```
+Jump Dist.
+```{r, echo=FALSE}
+summary(jump_distance)
+```
+Comp Country
+```{r, echo=FALSE}
+table(comp_country)
+```
+Jumper Country
+```{r, echo=FALSE}
+table(jumper_country)
+```
+Date of birth
+```{r, echo=FALSE}
+summary(jumper_DOB)
+```
+
+###Graphic summaries
+We can also build some nice graphic representation of each row.
+
+```{r, echo=FALSE}
+barplot(table(jump_speed),col=c("grey","red"))
+```
+Jump Speed
+```{r, echo=FALSE}
+barplot(table(jump_distance),col=c("yellow","blue","green"))
+```
+Jump Distance
+```{r, echo=FALSE}
+barplot(table(comp_country),col=c("red","blue","green"))
+```
+Comp. country
+```{r, echo=FALSE}
+barplot(table(jumper_country),col=c("orange","cyan","pink"))
+```
+Jumper Country
+```{r, echo=FALSE}
+barplot(table(jumper_DOB),col=c("grey","cyan"))
+```
+Jumper date of birth
+
+#4
+This report was generated with the knitr.
