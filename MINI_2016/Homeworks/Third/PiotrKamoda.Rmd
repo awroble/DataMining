@@ -7,15 +7,25 @@ output: html_document
 
 
 ```{r setup, echo=FALSE}
+library(caret)
 library(rpart)
 library(randomForest)
 d1=read.table("student-mat.csv",sep=";",header=TRUE)
-d1Train <- d1[0:300,]
-d1Test <- d1[301:600,]
+
+set.seed(1313)
+indxTrain <- createDataPartition(y = d1$Dalc, p = 0.5)
+str(indxTrain)
+
+d1Train <- d1[indxTrain$Resample1,]
+d1Test <- d1[-indxTrain$Resample1,]
 d1Train$Dalc <- factor(d1Train$Dalc) #Make sure setup is ok
 d1Test$Dalc <- factor(d1Test$Dalc) #Make sure setup is ok
 d1$Dalc <- factor(d1$Dalc)
 
+dim(d1Train)[1]
+len <- min(dim(d1Train)[1], dim(d1Test)[1])
+d1Train <- d1Train[1:len,]
+d1Test <- d1Test[1:len,]
 ```
 
 The task is to compare random forest and decision trees on the basis of their performance. Let's start with decision trees:
