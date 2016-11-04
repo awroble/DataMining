@@ -278,7 +278,7 @@ knn_fit <- knn3(class ~ data_channel_is_bus +
                     data_channel_is_socmed + 
                     data_channel_is_tech + 
                     is_weekend + 
-                    kw_max_max, data = Online_train, k=43)
+                    kw_max_max, data = Online_train, k=optimal_k)
 prob2 <- predict(knn_fit, newdata = Online_test, type="prob")[,2]
 
 fit.pred = prediction(prob, Online_test$class)
