@@ -1,0 +1,97 @@
+---
+title: "hw3"
+author: "Piotr Kamoda"
+date: "22 pazdziernika 2016"
+output: html_document
+---
+
+
+```{r setup, echo=FALSE}
+library(caret)
+library(rpart)
+library(randomForest)
+d1=read.table("student-mat.csv",sep=";",header=TRUE)
+
+set.seed(1313)
+indxTrain <- createDataPartition(y = d1$Dalc, p = 0.5)
+str(indxTrain)
+
+d1Train <- d1[indxTrain$Resample1,]
+d1Test <- d1[-indxTrain$Resample1,]
+d1Train$Dalc <- factor(d1Train$Dalc) #Make sure setup is ok
+d1Test$Dalc <- factor(d1Test$Dalc) #Make sure setup is ok
+d1$Dalc <- factor(d1$Dalc)
+
+dim(d1Train)[1]
+len <- min(dim(d1Train)[1], dim(d1Test)[1])
+d1Train <- d1Train[1:len,]
+d1Test <- d1Test[1:len,]
+```
+
+The task is to compare random forest and decision trees on the basis of their performance. Let's start with decision trees:
+
+```{r dt}
+rtree <- rpart(Dalc ~ school+sex+age+famsize+reason+failures+romantic, data = d1Train, method="class")
+tab <- table(real = d1Test$Dalc,
+      predicted = predict(rtree, data=d1Test, type = "class"))
+```
+
+Lets look at the output:
+
+```{r dto, echo=FALSE}
+show(rtree)
+show(tab)
+plot(rtree)
+text(rtree)
+```
+
+Let's check quality of the prediction: 
+```{r dtq, echo=FALSE}
+sum(diag(tab)) / sum(tab)
+```
+
+Quality of this prediction is 0.6. That's not a very good prediction.
+
+Now we can go on to random forests:
+
+```{r rf}
+ffit <- randomForest(Dalc ~ school+sex+age+famsize+reason+failures+romantic,   data=d1Train, importance = TRUE)
+print(ffit) 
+```
+
+Lets look at some details of how this model looks like:
+
+```{r rfd, echo=FALSE}
+importance(ffit)
+varImpPlot(ffit)
+head(predict(ffit, type="prob"))
+```
+
+And check the quality:
+
+```{r rfq, echo=FALSE}
+sum(diag(ffit$confusion)) / sum(ffit$confusion)
+```
+
+Quality of the prediction exceeded 0.7. <br />
+
+Just to make sure let's check models with less variables:
+
+```{r both}
+rtree <- rpart(Dalc ~ failures+absences+freetime, data = d1Train, method="class")
+ffit <- randomForest(Dalc ~ failures+absences+freetime,   data=d1Train, importance = TRUE)
+```
+
+And their qualities (in order):
+
+```{r bothq, echo=FALSE}
+tab <- table(real = d1Test$Dalc,
+      predicted = predict(rtree, data=d1Test, type = "class"))
+sum(diag(tab)) / sum(tab)
+sum(diag(ffit$confusion)) / sum(ffit$confusion)
+```
+
+Smaller difference but still visible.
+
+### Conclusion
+Random forests have better quality of final prediction then decision trees.
