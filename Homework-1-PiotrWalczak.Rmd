@@ -1,0 +1,79 @@
+---
+title: "Data Mining - Advances || Homework 1"
+author: "Piotr Walczak"
+date: "14 listopada 2016"
+output: pdf_document
+---
+
+Fist of all we have to load the _PogromcyDanych_ package.
+```{r, message=FALSE}
+library(PogromcyDanych)
+```
+Now we translate columns names into English by using _setLang()_ function. To check the description of the function and its arguments.
+```{r, message=FALSE}
+setLang(lang = "eng")
+```
+Let's look at our dataset and to compDate variable.
+```{r}
+head(skiJumps2013)
+summary(skiJumps2013$compDate)
+```
+skiJumps2013 dataset includes competitions from 29th October 2013 to 23th March 2014. So we need to limit the number of observations only to those which take place in 2014
+
+In our next step we will cut out data into new dataset, where we use the competitions that took place in 2014.
+```{r}
+skiJumps2014 <- skiJumps2013[skiJumps2013$compDate > "2014-01-01",]
+summary(skiJumps2014$compDate)
+```
+Our new dataset is in line with our expectations - all compDate are from 2014.
+
+## Numerical and graphical summaries for jumpSpeed
+```{r, fig.align='center'}
+table(skiJumps2014$jumpSpeed)
+summary(skiJumps2014$jumpSpeed)
+barplot(skiJumps2014$jumpSpeed)
+boxplot(skiJumps2014$jumpSpeed)
+hist(skiJumps2014$jumpSpeed, 100)
+```
+As we can we in summaries, jumpers speed's median speed is very close to it's mean.
+Also 1st and 3rd quantile are close. In that case there is no big difference between jumpers speed.
+
+## Numerical and graphical summaries for jumpDistance
+```{r, fig.align='center'}
+summary(skiJumps2014$jumpDistance)
+barplot(skiJumps2014$jumpDistance)
+boxplot(skiJumps2014$jumpDistance)
+hist(skiJumps2014$jumpDistance)
+```
+In distance od jumpers jump we can see, that we have results mainly about 130 meters. By baplot we can see that we have also two different type of jumpers jump distance. It depends on the type of contest.
+Normally, jumperst starts at hill with K-point located about 120 meter, but in several times during season they have to jump at hills with K-point located at 90 meter, or 180 meter - which is visible at barplot.
+
+## Numerical and graphical summaries for jumperDateOfBirth
+```{r, fig.align='center'}
+summary(skiJumps2014$jumperDateOfBirth)
+boxplot(skiJumps2014$jumperDateOfBirth)
+```
+Jumper's age is mainly between 23 and 31, like in any other professional sport. Of course, there are jumpers younger and older that this range, but usually it's outlier in our data.
+
+## Numerical and graphical summaries for compCountry
+```{r, fig.align='center'}
+tab <- table(skiJumps2014$compCountry)
+tab
+mean(tab)
+median(tab)
+range(tab)
+prop.table(tab)
+```
+As we can see, by compCountry data, Austria and Finland were countries where jumpers start most times. On the opposite side we have Sweden with only 81 competitors during one ski jumping event. This two countries are outliers, because usually average country has 170 jumpers.
+
+## Numerical and graphical summaries for jumperCountry
+```{r, fig.align='center'}
+tab2 <- table(skiJumps2014$jumperCountry)
+tab2
+mean(tab2)
+median(tab2)
+range(tab2)
+prop.table(tab2)
+```
+Germany, Austria, Slovakia - these three countries had almost 50% of jumpers during all season.
+On average, it was more than 70 jumpers, which jump for the country. Of course, in this data we have situations, when one jumper could start in many competitions.
